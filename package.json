@@ -1,0 +1,21 @@
+{
+  "name": "resenhabot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "none",
+  "license": "MIT",
+  "scripts": {
+    "dev": "yarn nodemon src/index.ts"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.3",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
+  }
+}
