@@ -8,9 +8,9 @@ export default {
     .setDescription("Mostra o ranking da resenha."),
 
   async execute(int: ChatInputCommandInteraction, db: DB) {
-    const results = await getRanking(db);
+    const results = await getRanking(db, int.guildId);
 
-    let msg = `## Ranking 📈 da Resenha 🤪 (Oficial) 📜 :\n`;
+    let msg = `## Ranking 📈 da Resenha 🤪 (Oficial) 📜 :\n\n`;
     results.forEach((r, i) => {
       msg += `\n ${i + 1} - <@${r.userId}> - (${r.resenhaPoints})`;
     });

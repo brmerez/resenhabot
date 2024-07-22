@@ -9,19 +9,23 @@ async function main() {
   const db = await setupDB();
   const commands = getCommands();
   const client = await setupClient();
+  const MINIMUM_REACTIONS = 3;
 
   client.on(Events.MessageReactionAdd, async (reaction, user) => {
     if (reaction.partial) {
       try {
         await reaction.fetch();
       } catch (e) {
-        console.error("Erro ao fazer fetch da mensagem", e);
+        console.error("Erro ao fazer fetch da reação", e);
       }
     }
 
-    if (reaction.emoji.name === "🤣") {
-      await addScore(user.id, reaction.message.guildId, db);
-      await reaction.message.react("🔥");
+    const { emoji, count, message } = reaction;
+
+    if (emoji.name === "🤣" && count >= MINIMUM_REACTIONS && !user.bot) {
+      console.log(`[Info]: ${user.displayName} (${user.id}) +1 Resenhapoint`);
+      await addScore(user.id, message.guildId, message.id, db);
+      await message.react("🔥");
     }
   });
 

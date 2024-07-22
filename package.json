@@ -5,7 +5,8 @@
   "author": "none",
   "license": "MIT",
   "scripts": {
-    "dev": "yarn nodemon src/index.ts"
+    "dev": "yarn nodemon src/index.ts",
+    "build": ""
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
