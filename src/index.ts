@@ -43,7 +43,7 @@ async function main() {
     console.log(
       `[Info]: ${message.author.displayName} (${message.author.id}) -1 Resenhapoint`
     );
-    await decrementScore(message.author.id, message.guildId, db);
+    await decrementScore(message.author.id, message.guildId, message.id, db);
     await message.react("😣");
   }
 });

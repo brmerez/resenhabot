@@ -13,7 +13,7 @@ export async function setupDB() {
   });
 
   await db.run(
-    "CREATE TABLE IF NOT EXISTS resenha (userId TEXT PRIMARY KEY, guildId TEXT, messageId TEXT);"
+    "CREATE TABLE IF NOT EXISTS resenha (userId TEXT PRIMARY KEY, guildId TEXT, messageId TEXT, resenhaPoints INTEGER DEFAULT 0);"
   );
 
   return db;
@@ -21,7 +21,7 @@ export async function setupDB() {
 
 export async function getRanking(db: DB, guildId: string): Promise<Score[]> {
   return await db.all<Score[]>(
-    "SELECT userId, COUNT(messageId) AS resenhaPoints FROM resenha where guildId = ? GROUP BY userId ORDER BY resenhaPoints DESC",
+    "SELECT userId, SUM(resenhaPoints) FROM resenha where guildId = ? GROUP BY userId ORDER BY resenhaPoints DESC",
     guildId
   );
 }
@@ -33,7 +33,7 @@ export async function addScore(
   db: DB
 ) {
   await db.run(
-    "INSERT OR IGNORE INTO resenha VALUES(?, ?, ?)",
+    "INSERT INTO resenha (userId, guildId, messageId, resenhaPoints) VALUES (?, ?, ?, 0) ON CONFLICT(userId, guildId, messageId) DO UPDATE SET resenhaPoints = resenhaPoints + 1;",
     uid,
     guildId,
     messageId
@@ -43,11 +43,13 @@ export async function addScore(
 export async function decrementScore(
   uid: string,
   guildId: string,
+  messageId: string,
   db: DB
 ) {
   await db.run(
-    "UPDATE resenha set resenhaPoints = resenhaPoints - 1 WHERE userId = ? AND guildId = ?",
+    "UPDATE resenha SET resenhaPoints = resenhaPoints - 1 WHERE userId = ? AND guildId = ? AND messageId = ?",
     uid,
-    guildId
+    guildId,
+    messageId
   );
 }
