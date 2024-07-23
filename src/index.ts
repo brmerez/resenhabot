@@ -1,6 +1,6 @@
 import { Events } from "discord.js";
 import dotEnv from "dotenv";
-import { addScore, setupDB } from "./db";
+import { addScore, decrementScore, setupDB } from "./db";
 import { getCommands } from "./commands";
 import setupClient from "./client";
 
@@ -34,6 +34,19 @@ async function main() {
       await message.react("🔥");
     }
   });
+
+  if (
+    emoji.name === "🙁" &&
+    count >= MINIMUM_REACTIONS &&
+    !message.author.bot
+  ) {
+    console.log(
+      `[Info]: ${message.author.displayName} (${message.author.id}) -1 Resenhapoint`
+    );
+    await decrementScore(message.author.id, message.guildId, db);
+    await message.react("😣");
+  }
+});
 
   client.on(Events.InteractionCreate, async (int) => {
     if (!int.isCommand()) {

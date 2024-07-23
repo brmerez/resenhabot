@@ -39,3 +39,15 @@ export async function addScore(
     messageId
   );
 }
+
+export async function decrementScore(
+  uid: string,
+  guildId: string,
+  db: DB
+) {
+  await db.run(
+    "UPDATE resenha set resenhaPoints = resenhaPoints - 1 WHERE userId = ? AND guildId = ?",
+    uid,
+    guildId
+  );
+}
