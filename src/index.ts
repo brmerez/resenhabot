@@ -22,9 +22,15 @@ async function main() {
 
     const { emoji, count, message } = reaction;
 
-    if (emoji.name === "🤣" && count >= MINIMUM_REACTIONS && !user.bot) {
-      console.log(`[Info]: ${user.displayName} (${user.id}) +1 Resenhapoint`);
-      await addScore(user.id, message.guildId, message.id, db);
+    if (
+      emoji.name === "🤣" &&
+      count >= MINIMUM_REACTIONS &&
+      !message.author.bot
+    ) {
+      console.log(
+        `[Info]: ${message.author.displayName} (${message.author.id}) +1 Resenhapoint`
+      );
+      await addScore(message.author.id, message.guildId, message.id, db);
       await message.react("🔥");
     }
   });

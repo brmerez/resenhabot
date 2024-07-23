@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "yarn nodemon src/index.ts",
-    "build": ""
+    "build": "yarn tsc"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
