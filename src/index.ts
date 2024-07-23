@@ -1,15 +1,15 @@
 import { Events } from "discord.js";
-import dotEnv from "dotenv";
 import { addScore, decrementScore, setupDB } from "./db";
 import { getCommands } from "./commands";
 import setupClient from "./client";
+import setupEnv from "./env";
 
 async function main() {
-  dotEnv.config();
+  const isProd = setupEnv();
   const db = await setupDB();
   const commands = getCommands();
   const client = await setupClient();
-  const MINIMUM_REACTIONS = 3;
+  const MINIMUM_REACTIONS = isProd ? 3 : 1;
 
   client.on(Events.MessageReactionAdd, async (reaction, user) => {
     if (reaction.partial) {
@@ -30,23 +30,22 @@ async function main() {
       console.log(
         `[Info]: ${message.author.displayName} (${message.author.id}) +1 Resenhapoint`
       );
-      await addScore(message.author.id, message.guildId, message.id, db);
+      await addScore(message.author.id, message.guildId, message.id, count, db);
       await message.react("🔥");
     }
-  });
 
-  if (
-    emoji.name === "🙁" &&
-    count >= MINIMUM_REACTIONS &&
-    !message.author.bot
-  ) {
-    console.log(
-      `[Info]: ${message.author.displayName} (${message.author.id}) -1 Resenhapoint`
-    );
-    await decrementScore(message.author.id, message.guildId, message.id, db);
-    await message.react("😣");
-  }
-});
+    if (
+      emoji.name === "🙁" &&
+      count >= MINIMUM_REACTIONS &&
+      !message.author.bot
+    ) {
+      console.log(
+        `[Info]: ${message.author.displayName} (${message.author.id}) -1 Resenhapoint`
+      );
+      await decrementScore(message.author.id, message.guildId, message.id, db);
+      await message.react("😣");
+    }
+  });
 
   client.on(Events.InteractionCreate, async (int) => {
     if (!int.isCommand()) {

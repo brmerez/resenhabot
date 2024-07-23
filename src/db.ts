@@ -30,16 +30,25 @@ export async function addScore(
   uid: string,
   guildId: string,
   messageId: string,
+  newScore: number,
   db: DB
 ) {
   await db.run(
-    "INSERT INTO resenha (userId, guildId, messageId, resenhaPoints) VALUES (?, ?, ?, 0) ON CONFLICT(userId, guildId, messageId) DO UPDATE SET resenhaPoints = resenhaPoints + 1;",
+    "INSERT OR IGNORE INTO resenha (userId, guildId, messageId, resenhaPoints) VALUES (?, ?, ?, 0)",
     uid,
     guildId,
     messageId
   );
+
+  await db.run(
+    "UPDATE resenha SET resenhaPoints = ? WHERE userId = ? AND messageId = ?",
+    newScore,
+    uid,
+    messageId
+  );
 }
 
+// TODO: Impossibilitar spam de decrementar score ao tirar e colocar a reação na mensagem.
 export async function decrementScore(
   uid: string,
   guildId: string,
