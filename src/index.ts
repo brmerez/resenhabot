@@ -25,7 +25,8 @@ async function main() {
     if (
       emoji.name === "🤣" &&
       count >= MINIMUM_REACTIONS &&
-      !message.author.bot
+      !message.author.bot &&
+      !message.reaction.includes("🔥")
     ) {
       console.log(
         `[Info]: ${message.author.displayName} (${message.author.id}) +1 Resenhapoint`
@@ -34,10 +35,13 @@ async function main() {
       await message.react("🔥");
     }
 
+
+    // Possível resolução do spam de emoji
     if (
       emoji.name === "🙁" &&
       count >= MINIMUM_REACTIONS &&
-      !message.author.bot
+      !message.author.bot &&
+      !message.reaction.includes("😣")
     ) {
       console.log(
         `[Info]: ${message.author.displayName} (${message.author.id}) -1 Resenhapoint`
