@@ -21,32 +21,28 @@ async function main() {
     }
 
     const { emoji, count, message } = reaction;
+    const { author } = message;
+    // const added = message.reactions.resolve("🔥");
+    const removed = message.reactions.resolve("😣");
 
-    if (
-      emoji.name === "🤣" &&
-      count >= MINIMUM_REACTIONS &&
-      !message.author.bot &&
-      !message.reaction.includes("🔥")
-    ) {
+    if (emoji.name === "🤣" && count >= MINIMUM_REACTIONS && !author.bot) {
       console.log(
-        `[Info]: ${message.author.displayName} (${message.author.id}) +1 Resenhapoint`
+        `[Info]: ${author.displayName} (${author.id}) +1 Resenhapoint`
       );
-      await addScore(message.author.id, message.guildId, message.id, count, db);
+      await addScore(author.id, message.guildId, message.id, count, db);
       await message.react("🔥");
     }
 
+    if (emoji.name === "🙁" && count >= MINIMUM_REACTIONS && !author.bot) {
+      if (removed) {
+        console.log("Ja reagi nessa!!!");
+        return;
+      }
 
-    // Possível resolução do spam de emoji
-    if (
-      emoji.name === "🙁" &&
-      count >= MINIMUM_REACTIONS &&
-      !message.author.bot &&
-      !message.reaction.includes("😣")
-    ) {
       console.log(
-        `[Info]: ${message.author.displayName} (${message.author.id}) -1 Resenhapoint`
+        `[Info]: ${author.displayName} (${author.id}) -1 Resenhapoint`
       );
-      await decrementScore(message.author.id, message.guildId, message.id, db);
+      await decrementScore(author.id, message.guildId, message.id, db);
       await message.react("😣");
     }
   });

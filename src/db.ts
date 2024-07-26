@@ -2,10 +2,6 @@ import { DB, Score } from "./types/db";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 
-interface SelectType {
-  resenhaPoints: number;
-}
-
 export async function setupDB() {
   const db = await open({
     filename: "./resenha.sqlite",
@@ -13,7 +9,7 @@ export async function setupDB() {
   });
 
   await db.run(
-    "CREATE TABLE IF NOT EXISTS resenha (userId TEXT PRIMARY KEY, guildId TEXT, messageId TEXT, resenhaPoints INTEGER DEFAULT 0);"
+    "CREATE TABLE IF NOT EXISTS resenha (userId TEXT, guildId TEXT, messageId TEXT, resenhaPoints INTEGER DEFAULT 0, UNIQUE(userId, guildId, messageId));"
   );
 
   return db;
@@ -21,7 +17,7 @@ export async function setupDB() {
 
 export async function getRanking(db: DB, guildId: string): Promise<Score[]> {
   return await db.all<Score[]>(
-    "SELECT userId, SUM(resenhaPoints) FROM resenha where guildId = ? GROUP BY userId ORDER BY resenhaPoints DESC",
+    "SELECT userId, SUM(resenhaPoints) as resenhaPoints FROM resenha where guildId = ? GROUP BY userId ORDER BY resenhaPoints DESC",
     guildId
   );
 }
