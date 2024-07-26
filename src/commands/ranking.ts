@@ -15,7 +15,7 @@ export default {
     let msg = `## Ranking 📈 da Resenha 🤪 (Oficial) 📜 :\n\n`;
     results.forEach((r, i) => {
       const user = users.get(r.userId).user;
-      msg += `\n ${i + 1} - ${user.displayName} - ${r.resenhaPoints}`;
+      msg += `\n ${i + 1} - ${user.displayName}, ${r.resenhaPoints} RP`;
     });
     await int.reply(msg);
   },
