@@ -5,6 +5,7 @@ import {
   UserContextMenuCommandInteraction,
 } from "discord.js";
 import { DB } from "./db";
+import DatabaseConnection from "../db";
 
 export default interface Command {
   data: SlashCommandBuilder;
@@ -13,7 +14,7 @@ export default interface Command {
       | ChatInputCommandInteraction
       | MessageContextMenuCommandInteraction
       | UserContextMenuCommandInteraction,
-    db: DB,
+    db: DatabaseConnection,
     ...args: any[]
   ) => Promise<void>;
 }

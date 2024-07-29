@@ -1,14 +1,14 @@
 import { Events } from "discord.js";
-import { addScore, decrementScore, setupDB } from "./db";
 import { getCommands } from "./commands";
-import setupClient from "./client";
+import DatabaseConnection from "./db";
+import CustomClient from "./client";
 import setupEnv from "./env";
 
 async function main() {
   const isProd = setupEnv();
-  const db = await setupDB();
+  const db = await DatabaseConnection.new();
   const commands = getCommands();
-  const client = await setupClient();
+  const client = await CustomClient.new();
   const MINIMUM_REACTIONS = isProd ? 3 : 1;
 
   client.on(Events.MessageReactionAdd, async (reaction, user) => {
@@ -29,7 +29,7 @@ async function main() {
       console.log(
         `[Info]: ${author.displayName} (${author.id}) +1 Resenhapoint`
       );
-      await addScore(author.id, message.guildId, message.id, count, db);
+      await db.addScore(author.id, message.guildId, message.id, count);
       await message.react("🔥");
     }
 
@@ -42,7 +42,7 @@ async function main() {
       console.log(
         `[Info]: ${author.displayName} (${author.id}) -1 Resenhapoint`
       );
-      await decrementScore(author.id, message.guildId, message.id, db);
+      await db.decrementScore(author.id, message.guildId, message.id);
       await message.react("😣");
     }
   });
