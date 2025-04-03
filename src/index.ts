@@ -35,15 +35,10 @@ async function main() {
     }
 
     if (emoji.name === "🙁" && count >= MINIMUM_REACTIONS && !author.bot) {
-      if (removed) {
-        console.log("Ja reagi nessa!!!");
-        return;
-      }
-
       console.log(
         `[Info]: ${author.displayName} (${author.id}) -1 Resenhapoint`
       );
-      await db.decrementScore(author.id, message.guildId, message.id);
+      await db.decrementScore(author.id, message.guildId, message.id, count);
       await message.react("😣");
     }
   });

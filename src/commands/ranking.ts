@@ -21,7 +21,7 @@ export default {
       // msg += `\n ${i + 1} - ${user.displayName}, ${r.resenhaPoints} RP`;
       mensagens.push({
         header: `${i + 1} - ${user.displayName} ${i == 0 ? "👑" : ""}`,
-        points: r.resenhaPoints,
+        points: r.netPoints,
       });
     });
 

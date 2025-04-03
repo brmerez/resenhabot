@@ -20,7 +20,7 @@ export default class DatabaseConnection {
     });
 
     await db.run(
-      "CREATE TABLE IF NOT EXISTS resenha (userId TEXT, guildId TEXT, messageId TEXT, resenhaPoints INTEGER DEFAULT 0, UNIQUE(userId, guildId, messageId));"
+      "CREATE TABLE IF NOT EXISTS resenha (userId TEXT, guildId TEXT, messageId TEXT, resenhaPoints INTEGER DEFAULT 0, paiaPoints INTEGER DEFAULT 0, UNIQUE(userId, guildId, messageId));"
     );
 
     return new DatabaseConnection(db);
@@ -28,7 +28,7 @@ export default class DatabaseConnection {
 
   async getRanking(guildId: string): Promise<Score[]> {
     return await this.db.all<Score[]>(
-      "SELECT userId, SUM(resenhaPoints) as resenhaPoints FROM resenha where guildId = ? GROUP BY userId ORDER BY resenhaPoints DESC",
+      "SELECT userId, SUM(resenhaPoints - paiaPoints) as netPoints FROM resenha where guildId = ? GROUP BY userId ORDER BY netPoints DESC",
       guildId
     );
   }
@@ -40,7 +40,7 @@ export default class DatabaseConnection {
     newScore: number
   ) {
     await this.db.run(
-      "INSERT OR IGNORE INTO resenha (userId, guildId, messageId, resenhaPoints) VALUES (?, ?, ?, 0)",
+      "INSERT OR IGNORE INTO resenha (userId, guildId, messageId, resenhaPoints, paiaPoints) VALUES (?, ?, ?, 0, 0)",
       uid,
       guildId,
       messageId
@@ -54,9 +54,21 @@ export default class DatabaseConnection {
     );
   }
 
-  async decrementScore(uid: string, guildId: string, messageId: string) {
+  async decrementScore(
+    uid: string,
+    guildId: string,
+    messageId: string,
+    paiaPoints: number
+  ) {
     await this.db.run(
-      "UPDATE resenha SET resenhaPoints = resenhaPoints - 1 WHERE userId = ? AND guildId = ? AND messageId = ?",
+      "INSERT OR IGNORE INTO resenha (userId, guildId, messageId, resenhaPoints, paiaPoints) VALUES (?, ?, ?, 0, 0)",
+      uid,
+      guildId,
+      messageId
+    );
+    await this.db.run(
+      "UPDATE resenha SET paiaPoints = ? WHERE userId = ? AND guildId = ? AND messageId = ?",
+      paiaPoints,
       uid,
       guildId,
       messageId
