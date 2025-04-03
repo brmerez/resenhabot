@@ -44,8 +44,8 @@ function getEmbedRanking(ranks: Ranking[]): EmbedBuilder {
     .addFields(
       ranks.map((rank) => {
         return {
-          name: rank.header,
-          value: rank.points + " RP",
+          name: `${rank.header} - ${rank.points} RP`,
+          value: " ",
           inline: false,
         };
       })
