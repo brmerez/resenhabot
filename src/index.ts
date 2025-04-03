@@ -23,8 +23,6 @@ async function main() {
 
     const { emoji, count, message } = reaction;
     const { author } = message;
-    // const added = message.reactions.resolve("🔥");
-    const removed = message.reactions.resolve("😣");
 
     if (emoji.name === "🤣" && count >= MINIMUM_REACTIONS && !author.bot) {
       console.log(
