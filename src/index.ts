@@ -17,6 +17,7 @@ async function main() {
         await reaction.fetch();
       } catch (e) {
         console.error("Erro ao fazer fetch da reação", e);
+        return;
       }
     }
 
