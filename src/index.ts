@@ -3,6 +3,7 @@ import { getCommands } from "./commands";
 import DatabaseConnection from "./db";
 import CustomClient from "./client";
 import setupEnv from "./env";
+import { EmojiHandler } from "./types/reacts";
 
 async function main() {
   const isProd = setupEnv();
@@ -10,6 +11,10 @@ async function main() {
   const commands = getCommands();
   const client = await CustomClient.new();
   const MINIMUM_REACTIONS = isProd ? 3 : 1;
+
+  const emojiMap = new Map<string, EmojiHandler>();
+  emojiMap.set("🤣", { react: "🔥", action: db.addScore });
+  emojiMap.set("🙁", { react: "😣", action: db.decrementScore });
 
   client.on(Events.MessageReactionAdd, async (reaction, user) => {
     if (reaction.partial) {
@@ -22,23 +27,22 @@ async function main() {
     }
 
     const { emoji, count, message } = reaction;
-    const { author } = message;
+    const { author, id: messageId, guildId } = message;
 
-    if (emoji.name === "🤣" && count >= MINIMUM_REACTIONS && !author.bot) {
-      console.log(
-        `[Info]: ${author.displayName} (${author.id}) +1 Resenhapoint`
-      );
-      await db.addScore(author.id, message.guildId, message.id, count);
-      await message.react("🔥");
+    if (author.bot) {
+      return;
     }
 
-    if (emoji.name === "🙁" && count >= MINIMUM_REACTIONS && !author.bot) {
-      console.log(
-        `[Info]: ${author.displayName} (${author.id}) -1 Resenhapoint`
-      );
-      await db.decrementScore(author.id, message.guildId, message.id, count);
-      await message.react("😣");
+    if (count < MINIMUM_REACTIONS) {
+      return;
     }
+
+    const match = emojiMap.get(emoji.name);
+
+    if (!match) return;
+
+    await match.action(author.id, guildId, messageId, count);
+    await message.react(match.react);
   });
 
   client.on(Events.InteractionCreate, async (int) => {
@@ -46,9 +50,11 @@ async function main() {
       return;
     }
 
-    if (commands.has(int.commandName)) {
-      await commands.get(int.commandName)?.execute(int, db);
+    if (!commands.has(int.commandName)) {
+      return;
     }
+
+    await commands.get(int.commandName)?.execute(int, db);
   });
 
   process.on("SIGINT", async (s) => {
