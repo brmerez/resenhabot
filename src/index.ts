@@ -3,7 +3,7 @@ import { getCommands } from "./commands";
 import DatabaseConnection from "./db";
 import CustomClient from "./client";
 import setupEnv from "./env";
-import { EmojiHandler } from "./types/reacts";
+import { ActionArgs, EmojiHandler } from "./types/reacts";
 
 async function main() {
   const isProd = setupEnv();
@@ -13,8 +13,14 @@ async function main() {
   const MINIMUM_REACTIONS = isProd ? 3 : 1;
 
   const emojiMap = new Map<string, EmojiHandler>();
-  emojiMap.set("🤣", { react: "🔥", action: db.addScore });
-  emojiMap.set("🙁", { react: "😣", action: db.decrementScore });
+  emojiMap.set("🤣", {
+    react: "🔥",
+    action: (args: ActionArgs, db: DatabaseConnection) => db.addScore(args),
+  });
+  emojiMap.set("🙁", {
+    react: "🍅",
+    action: (args: ActionArgs, db: DatabaseConnection) => db.decScore(args),
+  });
 
   client.on(Events.MessageReactionAdd, async (reaction, user) => {
     if (reaction.partial) {
@@ -28,12 +34,9 @@ async function main() {
 
     const { emoji, count, message } = reaction;
     const { author, id: messageId, guildId } = message;
+    const authorId = author.id;
 
-    if (author.bot) {
-      return;
-    }
-
-    if (count < MINIMUM_REACTIONS) {
+    if (author.bot || count < MINIMUM_REACTIONS) {
       return;
     }
 
@@ -41,7 +44,7 @@ async function main() {
 
     if (!match) return;
 
-    await match.action(author.id, guildId, messageId, count);
+    await match.action({ authorId, guildId, messageId, count }, db);
     await message.react(match.react);
   });
 

@@ -1,6 +1,7 @@
 import { DB, Score } from "./types/db";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
+import { ActionArgs } from "./types/reacts";
 
 export default class DatabaseConnection {
   private db: DB;
@@ -33,43 +34,37 @@ export default class DatabaseConnection {
     );
   }
 
-  async addScore(
-    uid: string,
-    guildId: string,
-    messageId: string,
-    newScore: number
-  ) {
+  async addScore(args: ActionArgs) {
+    const { authorId, guildId, messageId, count } = args;
+
     await this.db.run(
       "INSERT OR IGNORE INTO resenha (userId, guildId, messageId, resenhaPoints, paiaPoints) VALUES (?, ?, ?, 0, 0)",
-      uid,
+      authorId,
       guildId,
       messageId
     );
 
     await this.db.run(
       "UPDATE resenha SET resenhaPoints = ? WHERE userId = ? AND messageId = ?",
-      newScore,
-      uid,
+      count,
+      authorId,
       messageId
     );
   }
 
-  async decrementScore(
-    uid: string,
-    guildId: string,
-    messageId: string,
-    paiaPoints: number
-  ) {
+  async decScore(args: ActionArgs) {
+    const { authorId, guildId, messageId, count } = args;
+
     await this.db.run(
       "INSERT OR IGNORE INTO resenha (userId, guildId, messageId, resenhaPoints, paiaPoints) VALUES (?, ?, ?, 0, 0)",
-      uid,
+      authorId,
       guildId,
       messageId
     );
     await this.db.run(
       "UPDATE resenha SET paiaPoints = ? WHERE userId = ? AND guildId = ? AND messageId = ?",
-      paiaPoints,
-      uid,
+      count,
+      authorId,
       guildId,
       messageId
     );
