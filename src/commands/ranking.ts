@@ -2,8 +2,8 @@ import {
   ChatInputCommandInteraction,
   EmbedBuilder,
   SlashCommandBuilder,
-  AttachmentBuilder}
-  from "discord.js";
+  AttachmentBuilder,
+} from "discord.js";
 import DatabaseConnection from "../db";
 import fs from "fs";
 import path from "path";
@@ -17,12 +17,9 @@ export default {
 
   async execute(int: ChatInputCommandInteraction, db: DatabaseConnection) {
     const results = await db.getRanking(int.guildId);
-    const ids = results.map((r) => r.userId);
-    const users = await int.guild.members.fetch({ user: ids });
     let mensagens: Ranking[] = [];
 
     results.forEach((r, i) => {
-      const user = users.get(r.userId).user;
       mensagens.push({
         userId: r.userId,
         points: r.netPoints,
@@ -31,22 +28,38 @@ export default {
 
     const { embed, file } = await getEmbedRanking(mensagens);
     await int.reply({ embeds: [embed], files: [file] });
-    
   },
 };
 
 type Ranking = { userId: string; points: number };
 
-async function getEmbedRanking(ranks: Ranking[]): Promise<{ embed: EmbedBuilder; file: AttachmentBuilder }> {
+function getRankingEmoji(index: number) {
+  switch (index) {
+    case 0:
+      return "🥇";
+    case 1:
+      return "🥈";
+    case 2:
+      return "🥉";
+    default:
+      return `${index + 1}`;
+  }
+}
+
+async function getEmbedRanking(
+  ranks: Ranking[]
+): Promise<{ embed: EmbedBuilder; file: AttachmentBuilder }> {
   const { file, url } = await getLocalRandomImg();
 
   const rankDescriptions = ranks.map((rank, index) => {
-    const placeEmoji = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}`;
+    let placeEmoji = getRankingEmoji(index);
     return `• ${placeEmoji} <@${rank.userId}> \`${rank.points} RP\``;
   });
 
   const embed = new EmbedBuilder()
-    .setTitle("Ranking 📈 da Resenha 🤪 (Oficial) 2025 - A Resenha Agora É Outra!! 📜")
+    .setTitle(
+      "Ranking 📈 da Resenha 🤪 (Oficial) 2025 - A Resenha Agora É Outra!! 📜"
+    )
     .setDescription(rankDescriptions.join("\n"))
     .setColor("#ff7800")
     .setImage(url)
@@ -55,13 +68,18 @@ async function getEmbedRanking(ranks: Ranking[]): Promise<{ embed: EmbedBuilder;
   return { embed, file };
 }
 
-async function getLocalRandomImg(): Promise<{ file: AttachmentBuilder; url: string }> {
+async function getLocalRandomImg(): Promise<{
+  file: AttachmentBuilder;
+  url: string;
+}> {
   if (!fs.existsSync(img_dir)) {
     console.error(`Pasta de imagens não encontrada: ${img_dir}`);
     throw new Error("Pasta de imagens não encontrada.");
   }
 
-  const files = fs.readdirSync(img_dir).filter((file) => /\.(png|jpg)$/i.test(file));
+  const files = fs
+    .readdirSync(img_dir)
+    .filter((file) => /\.(png|jpg)$/i.test(file));
 
   if (files.length === 0) {
     throw new Error("Nenhuma imagem encontrada na pasta.");
